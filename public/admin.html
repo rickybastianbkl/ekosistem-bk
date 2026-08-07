@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Admin - Bank Soal BK</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: #f4f6f9; }
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    input, select, textarea, button { width: 100%; margin-bottom: 12px; padding: 10px; box-sizing: border-box; }
+    button { background-color: #28a745; color: white; border: none; font-weight: bold; cursor: pointer; border-radius: 4px; }
+    button:hover { background-color: #218838; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Input Bank Soal</h2>
+    <form id="questionForm">
+      <label><b>Kategori Soal:</b></label>
+      <select id="category">
+        <option value="matematika">Matematika</option>
+        <option value="psikotes">Psikotes</option>
+        <option value="cfit">CFIT</option>
+      </select>
+
+      <label><b>Pertanyaan:</b></label>
+      <textarea id="questionText" rows="3" required placeholder="Tuliskan soal di sini..."></textarea>
+
+      <label><b>Pilihan Jawaban:</b></label>
+      <input type="text" id="optA" placeholder="Opsi A" required>
+      <input type="text" id="optB" placeholder="Opsi B" required>
+      <input type="text" id="optC" placeholder="Opsi C" required>
+      <input type="text" id="optD" placeholder="Opsi D" required>
+
+      <label><b>Kunci Jawaban (A/B/C/D):</b></label>
+      <input type="text" id="answer" maxlength="1" placeholder="Contoh: A" required>
+
+      <button type="submit">Simpan Soal ke Sistem</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('questionForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const category = document.getElementById('category').value;
+      const questionData = {
+        soal: document.getElementById('questionText').value,
+        opsi: [
+          document.getElementById('optA').value,
+          document.getElementById('optB').value,
+          document.getElementById('optC').value,
+          document.getElementById('optD').value
+        ],
+        kunci: document.getElementById('answer').value.toUpperCase()
+      };
+
+      const res = await fetch('/api/questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category, questionData })
+      });
+      const result = await res.json();
+      alert(result.message);
+      e.target.reset();
+    });
+  </script>
+</body>
+</html>
