@@ -15,7 +15,7 @@ export async function onRequest(context) {
   }
 
   try {
-    // --- 1. API SISWA (LOGIN, SKOR, KELUHAN) ---
+    // --- 1. API SISWA ---
     if (path === '/api/student/login' && request.method === 'POST') {
       const { studentCode, studentName } = await request.json();
       await env.DB.prepare(
@@ -42,7 +42,7 @@ export async function onRequest(context) {
       return new Response(JSON.stringify({ success: true }), { headers });
     }
 
-    // --- 2. API SOAL (KELOLA SOAL ADMIN & UJIAN SISWA) ---
+    // --- 2. API SOAL ---
     if (path === '/api/questions' && request.method === 'GET') {
       const { results } = await env.DB.prepare(`SELECT * FROM questions`).all();
       return new Response(JSON.stringify(results), { headers });
@@ -62,7 +62,7 @@ export async function onRequest(context) {
       return new Response(JSON.stringify({ success: true }), { headers });
     }
 
-    // --- 3. API REKAP MASTER ADMIN ---
+    // --- 3. API REKAP ---
     if (path === '/api/admin/student-reports' && request.method === 'GET') {
       const { results: students } = await env.DB.prepare(`SELECT * FROM students`).all();
       const { results: scores } = await env.DB.prepare(`SELECT * FROM scores`).all();
@@ -79,40 +79,63 @@ export async function onRequest(context) {
       return new Response(JSON.stringify(reportData), { headers });
     }
 
+    // --- 4. API CHAT AI LILI (GROQ GRATIS TANPA LIMIT) ---
+    if (path === '/api/chat' && request.method === 'POST') {
+      const { message } = await request.json();
+      
+      // Gunakan GROQ (gratis, tanpa syarat billing ketat)
+      const GROQ_KEY = env.GROQ_API_KEY;
+
+      if (!GROQ_KEY) {
+        return new Response(
+          JSON.stringify({ reply: "⚠️ Konfigurasi AI belum lengkap. Hubungi admin." }), 
+          { status: 503, headers }
+        );
+      }
+
+      try {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${GROQ_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: "llama-3.1-8b-instant",
+            messages: [
+              { 
+                role: "system", 
+                content: "Kamu adalah Lili, AI Resepsionis dan Guru BK yang ramah, profesional, dan empatik di sebuah sekolah Indonesia. Jawablah pertanyaan siswa dalam Bahasa Indonesia dengan ringkas (maksimal 3 kalimat), suportif, dan menggunakan bahasa yang sopan sesuai norma kesopanan." 
+              },
+              { role: "user", content: message }
+            ],
+            temperature: 0.7,
+            max_tokens: 300
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error?.message || 'Gagal menghubungi server AI');
+        }
+
+        const reply = data.choices?.[0]?.message?.content || "Maaf, Lili sedang tidak bisa merespons.";
+        return new Response(JSON.stringify({ reply }), { headers });
+
+      } catch (error) {
+        console.error("AI Error:", error);
+        return new Response(
+          JSON.stringify({ reply: `❌ Terjadi gangguan pada AI: ${error.message}` }),
+          { status: 500, headers }
+        );
+      }
+    }
+
+    // Default fallback
     return new Response(JSON.stringify({ error: 'Endpoint tidak ditemukan' }), { status: 404, headers });
+
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), { status: 500, headers });
   }
 }
-// --- 4. API CHAT AI LILI ---
-    if (path === '/api/chat' && request.method === 'POST') {
-      const { message } = await request.json();
-      const API_KEY = env.GEMINI_API_KEY;
-      const MODEL = "gemini-1.5-flash";
-
-      if (!API_KEY) {
-        return new Response(JSON.stringify({ reply: "API Key (GEMINI_API_KEY) belum dikonfigurasi di Cloudflare Dashboard." }), { headers });
-      }
-
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: {
-            parts: { text: "Kamu adalah Lili, AI Resepsionis dan Guru BK yang ramah, profesional, dan empatik. Jawablah pertanyaan siswa dengan ringkas dan suportif." }
-          },
-          contents: [{ role: "user", parts: [{ text: message }] }]
-        })
-      });
-
-      const data = await res.json();
-
-      // Jika Google AI Studio mengembalikan status error (misal API Key invalid)
-      if (!res.ok) {
-        const errorMsg = data.error?.message || "Gagal menghubungi Google AI.";
-        return new Response(JSON.stringify({ reply: `[Gemini Error]: ${errorMsg}` }), { headers });
-      }
-
-      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, Lili tidak dapat merespons saat ini.";
-      return new Response(JSON.stringify({ reply }), { headers });
-    }
