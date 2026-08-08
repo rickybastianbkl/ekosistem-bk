@@ -113,7 +113,6 @@
     <div class="portal-sub">Masukkan Kode Siswa / NIS untuk mencatat progres latihan Anda.</div>
     <form onsubmit="handlePortalLogin(event)">
       <input type="text" id="input-student-code" class="form-ctrl" placeholder="Kode Siswa / NIS (cth: SISWA-101)" required>
-      <input type="text" id="input-student-name" class="form-ctrl" placeholder="Nama Lengkap Siswa" required>
       <button type="submit" class="btn-submit" style="margin-top: 8px;">Masuk Ke Dashboard</button>
     </form>
   </div>
@@ -293,12 +292,22 @@
   async function handlePortalLogin(e) {
     e.preventDefault();
     const code = document.getElementById('input-student-code').value.trim();
-    const name = document.getElementById('input-student-name').value.trim();
 
+    // Logika Akun Master Admin
+    if (code === 'adminR12') {
+      currentStudent = { code: 'adminR12', name: 'Master Admin' };
+      localStorage.setItem('bk_student_session', JSON.stringify(currentStudent));
+      document.getElementById('portal-modal').style.display = 'none';
+      updateStudentUI();
+      switchTab('tab-admin', document.querySelectorAll('.nav-link')[4]);
+      return;
+    }
+
+    // Default nama diset ke "Siswa" karena input nama dihapus
     const res = await fetch('/api/student/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ studentCode: code, studentName: name })
+      body: JSON.stringify({ studentCode: code, studentName: "Siswa" })
     });
     const data = await res.json();
 
