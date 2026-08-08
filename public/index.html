@@ -290,9 +290,7 @@
       updateStudentUI();
     }
   }
-
-  // --- MULAI SALIN DARI SINI ---
-  async function handlePortalLogin(e) {
+async function handlePortalLogin(e) {
     if (e) e.preventDefault();
     const codeEl = document.getElementById('input-student-code');
     if (!codeEl) return;
@@ -303,7 +301,6 @@
       return;
     }
 
-    // 1. Master Admin
     if (code === 'adminR12') {
       currentStudent = { code: 'adminR12', name: 'Master Admin' };
       localStorage.setItem('bk_student_session', JSON.stringify(currentStudent));
@@ -313,7 +310,6 @@
       return;
     }
 
-    // 2. Data Dummy Siswa
     const dataDummy = {
       "DEMO-01": "Andi Pratama (Siswa Demo)",
       "DEMO-02": "Siti Aminah (Siswa Demo)",
@@ -329,7 +325,6 @@
       return; 
     }
 
-    // 3. Logika API (Cek Database)
     try {
       const res = await fetch('/api/student/login', {
         method: 'POST',
@@ -358,7 +353,6 @@
     document.getElementById('disp-student-name').innerText = currentStudent.name;
     document.getElementById('disp-student-code').innerText = `NIS: ${currentStudent.code}`;
 
-    // Pengaturan Hak Akses (Aman)
     const navLinks = document.querySelectorAll('.nav-link');
     const adminMenu = navLinks.length > 4 ? navLinks[4] : null; 
     
@@ -392,7 +386,6 @@
       loadTeacherReports();
     }
   }
-  // --- SAMPAI SINI ---
 
   function logout() {
     localStorage.removeItem('bk_student_session');
@@ -404,22 +397,6 @@
     document.getElementById('overlay').classList.toggle('open');
   }
 
-  function switchTab(tabId, el) {
-    // --- KEAMANAN EKSTRA: Cegah siswa memaksa masuk tab admin ---
-    if (tabId === 'tab-admin' && currentStudent.code !== 'adminR12') {
-      alert('Akses Ditolak: Anda tidak memiliki izin untuk membuka halaman Master Admin.');
-      return; // Hentikan proses jika bukan admin
-    }
-    // ------------------------------------------------------------
-
-    document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
-    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-    if (el) el.classList.add('active');
-
-    if (tabId === 'tab-admin') loadTeacherReports();
-  }
-
   async function loadData() {
     try {
       const res = await fetch('/api/questions');
@@ -427,7 +404,6 @@
       quizData = await res.json();
     } catch (err) {
       console.warn("Gagal memuat API Soal. Menggunakan data dummy sementara.");
-      // Data Dummy Soal untuk Demo
       quizData = {
         matematika: [
           { soal: "Berapa hasil dari 15 + 25?", opsi: ["30", "35", "40", "45"], kunci: "C" },
@@ -438,7 +414,6 @@
         ]
       };
     }
-    
     renderQuiz('matematika', 'math-quiz-list');
     renderQuiz('psikotes', 'psikotes-quiz-list');
   }
@@ -489,9 +464,9 @@
         correct: correct,
         total: questions.length
       })
-    });
+    }).catch(() => {}); // Hindari error API
 
-    alert(`Ujian Selesai! Skor Anda: ${score} (${correct}/${questions.length} Benar). Hasil telah dicatat untuk Guru BK.`);
+    alert(`Ujian Selesai! Skor Anda: ${score} (${correct}/${questions.length} Benar). Hasil telah dicatat.`);
     switchTab('tab-chat', document.querySelectorAll('.nav-link')[3]);
   }
 
@@ -505,12 +480,11 @@
     input.value = '';
     body.scrollTop = body.scrollHeight;
 
-    // Abaikan error 404 dari complaint (simpan keluhan) secara diam-diam
     fetch('/api/student/complaint', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ studentCode: currentStudent.code, message: msg })
-    }).catch(() => {}); // Mengabaikan error API
+    }).catch(() => {});
 
     body.innerHTML += `<div class="msg bot"><i>Lili sedang menganalisis...</i></div>`;
 
@@ -526,37 +500,10 @@
       body.innerHTML += `<div class="msg bot">${data.reply}</div>`;
     } catch (err) {
       body.lastElementChild.remove();
-      // Balasan simulasi jika API belum siap
       body.innerHTML += `<div class="msg bot">*(Mode Demo)* Keluhanmu tentang "${msg}" sudah Lili catat secara sistem. Guru BK akan segera mengevaluasinya!</div>`;
     }
     body.scrollTop = body.scrollHeight;
   }
-
-    // Simpan Keluhan Siswa ke Server Guru BK
-    fetch('/api/student/complaint', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ studentCode: currentStudent.code, message: msg })
-    });
-
-    body.innerHTML += `<div class="msg bot"><i>Lili sedang menganalisis...</i></div>`;
-
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: msg })
-      });
-      const data = await res.json();
-      body.lastElementChild.remove();
-      body.innerHTML += `<div class="msg bot">${data.reply}</div>`;
-    } catch (err) {
-      body.lastElementChild.remove();
-      body.innerHTML += `<div class="msg bot">Maaf, terjadi gangguan koneksi.</div>`;
-    }
-    body.scrollTop = body.scrollHeight;
-  
-
   async function loadTeacherReports() {
     let reports = {};
     
