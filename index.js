@@ -83,7 +83,7 @@ export default {
       if (path === '/api/chat' && request.method === 'POST') {
         const { message } = await request.json();
         const API_KEY = env.GEMINI_API_KEY;
-        const MODEL = "gemini-1.5-flash";
+        const MODEL = "gemini-2.0-flash";
 
         if (!API_KEY) {
           return new Response(JSON.stringify({ reply: "API Key (GEMINI_API_KEY) belum dikonfigurasi di Cloudflare Dashboard." }), { headers });
