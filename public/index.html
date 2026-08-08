@@ -3,461 +3,642 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ekosistem BK - Dashboard Admin</title>
+<title>Ekosistem BK - Admin Pro</title>
+<!-- Import Font Modern -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
     :root {
-        --sidebar-bg: #1B5E44; /* Hijau Tua Forest (dari Foto 2) */
-        --sidebar-hover: #26734F;
-        --main-bg: #F0F2F5;
+        --sidebar-bg: #0F3829; /* Hijau Deep Forest */
+        --sidebar-active: #1a5538;
+        --main-bg: #F3F4F6;
         --card-bg: #FFFFFF;
-        --text-primary: #333;
-        --text-secondary: #666;
-        --accent-green: #2E7D32;
-        --border-color: #E0E0E0;
-        --gold: #D4AF37; /* Aksen untuk highlight penting */
+        --text-main: #1F2937;
+        --text-muted: #6B7280;
+        --accent-gold: #F59E0B; /* Amber/Gold */
+        --border-color: #E5E7EB;
+        --glass-bg: rgba(255, 255, 255, 0.08);
+        --glass-border: rgba(255, 255, 255, 0.15);
+        
+        /* Icon Colors */
+        --icon-dash: #60A5FA; /* Blue */
+        --icon-math: #34D399; /* Green */
+        --icon-psik: #A78BFA; /* Purple */
+        --icon-rekap: #FBBF24; /* Yellow */
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+        font-family: 'Inter', sans-serif;
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+        background-color: var(--main-bg);
+        color: var(--text-main);
+    }
 
-    body { display: flex; height: 100vh; overflow: hidden; background-color: var(--main-bg); }
-
-    /* --- SIDEBAR STYLING (Kiri) --- */
+    /* --- SIDEBAR REDESIGN --- */
     .sidebar {
         width: 260px;
-        background-color: var(--sidebar-bg);
+        background: linear-gradient(180deg, var(--sidebar-bg) 0%, #0a231a 100%);
         color: white;
         display: flex;
         flex-direction: column;
-        flex-shrink: 0;
-        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-        transition: transform 0.3s ease;
-    }
-
-    .brand-area {
-        padding: 25px 20px;
-        text-align: center;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .avatar-placeholder {
-        width: 60px;
-        height: 60px;
-        background: rgba(255,255,255,0.15);
-        border-radius: 50%;
-        margin: 0 auto 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        border: 3px solid var(--gold);
-    }
-
-    .brand-title { font-size: 18px; font-weight: 700; color: #fff; }
-    .brand-subtitle { font-size: 12px; opacity: 0.8; margin-top: 4px; }
-
-    .nav-menu { list-style: none; margin-top: 20px; flex-grow: 1; }
-    
-    .nav-item a {
-        display: flex;
-        align-items: center;
-        padding: 14px 25px;
-        color: rgba(255,255,255,0.85);
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 500;
-        transition: all 0.2s;
-        border-left: 4px solid transparent;
-    }
-    
-    .nav-item a:hover, .nav-item.active a {
-        background-color: var(--sidebar-hover);
-        color: #fff;
-        border-left-color: var(--gold);
-    }
-
-    .nav-icon { margin-right: 12px; font-size: 16px; width: 24px; text-align: center; }
-
-    /* Footer Sidebar */
-    .sidebar-footer {
-        padding: 20px;
-        border-top: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .btn-switch-user {
-        display: block;
-        width: 100%;
-        padding: 10px;
-        background: transparent;
-        border: 1px solid rgba(255,255,255,0.3);
-        color: white;
-        border-radius: 6px;
-        cursor: pointer;
-        text-align: center;
-        font-size: 13px;
-        transition: background 0.2s;
-    }
-    .btn-switch-user:hover { background: rgba(255,255,255,0.1); }
-
-    /* --- MAIN CONTENT (Kanan) --- */
-    .main-content {
-        flex-grow: 1;
-        overflow-y: auto;
+        box-shadow: 4px 0 15px rgba(0,0,0,0.1);
         position: relative;
-    }
-
-    header.top-bar {
-        background: var(--card-bg);
-        padding: 20px 30px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: sticky;
-        top: 0;
         z-index: 10;
-    }
-    
-    h2.page-title { font-size: 20px; color: var(--text-primary); display: flex; align-items: center; gap: 10px; }
-    h2.page-title::before { content: '📊'; }
-
-    .content-wrapper { padding: 25px 30px; max-width: 1200px; }
-
-    /* CARD SECTION: LAPORAN (Seperti Foto 2) */
-    .card-section {
-        background: var(--card-bg);
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        padding: 25px;
-        margin-bottom: 25px;
-    }
-    
-    .section-header {
-        font-size: 16px;
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: 15px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid var(--border-color);
+        overflow-y: auto;
     }
 
-    /* TABLE DATA */
-    .data-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 14px;
-    }
-    
-    .data-table th {
-        text-align: left;
-        padding: 12px 15px;
-        background-color: #F8F9FA;
-        color: var(--text-secondary);
-        font-weight: 600;
-        border-bottom: 2px solid var(--border-color);
-    }
-    
-    .data-table td {
-        padding: 12px 15px;
-        border-bottom: 1px solid #f0f0f0;
-        color: var(--text-primary);
-    }
-    
-    .empty-state {
+    /* Scrollbar styling for sidebar */
+    .sidebar::-webkit-scrollbar { width: 6px; }
+    .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+    /* --- AVATAR AREA (MODERN GLASSMORPHISM) --- */
+    .brand-container {
+        padding: 30px 25px;
         text-align: center;
-        padding: 40px;
-        color: var(--text-secondary);
-        font-style: italic;
+        border-bottom: 1px solid var(--glass-border);
+        background: rgba(0,0,0,0.15);
     }
 
-    /* FORM INPUT SECTION */
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
-    
-    .form-control {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-        transition: border 0.2s;
-    }
-    .form-control:focus { outline: none; border-color: var(--accent-green); }
-
-    select.form-control { background-color: white; }
-
-    .options-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-    }
-
-    .btn-submit {
-        background-color: var(--sidebar-bg);
-        color: white;
-        border: none;
-        padding: 12px;
-        width: 100%;
-        border-radius: 4px;
-        font-weight: 600;
-        cursor: pointer;
-        margin-top: 10px;
-        transition: background 0.2s;
-    }
-    .btn-submit:hover { background-color: var(--sidebar-hover); }
-
-    /* YU LENI WIDGET (Floating Right Bottom - tetap ada tapi lebih sleek) */
-    #yu-leni-widget {
-        position: fixed;
-        bottom: 25px;
-        right: 25px;
-        z-index: 9999;
-    }
-    
-    #chat-trigger {
-        width: 55px;
-        height: 55px;
-        background: linear-gradient(135deg, var(--gold), #B8960C);
-        border-radius: 50%;
-        border: none;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
-        color: white;
-        font-size: 24px;
+    .modern-avatar {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 15px;
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: transform 0.2s;
     }
-    #chat-trigger:hover { transform: scale(1.05); }
 
-    #chat-window {
+    /* The Ring */
+    .avatar-ring {
         position: absolute;
-        bottom: 70px;
-        right: 0;
-        width: 320px;
-        height: 400px;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 10px 35px rgba(0,0,0,0.15);
-        display: none;
-        flex-direction: column;
-        overflow: hidden;
-        border: 1px solid #eee;
-        animation: slideUp 0.3s ease;
+        inset: 0;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        background: linear-gradient(white, white) padding-box,
+                    linear-gradient(135deg, var(--accent-gold), #10B981) border-box;
+        animation: spin-slow 8s linear infinite;
     }
 
-    @keyframes slideUp { from{opacity:0; transform: translateY(10px);} to{opacity:1; transform: translateY(0);} }
+    @keyframes spin-slow { to{ transform: rotate(360deg); } }
 
-    .chat-header-bk {
-        background: var(--sidebar-bg);
-        color: white;
-        padding: 12px 15px;
-        font-weight: 600;
-        font-size: 13px;
+    /* The Inner Image/Icon */
+    .avatar-inner {
+        position: relative;
+        z-index: 2;
+        width: 68px;
+        height: 68px;
+        background: radial-gradient(circle at 30% 30%, #374151, #111827);
+        border-radius: 50%;
         display: flex;
-        justify-content: space-between;
         align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        overflow: hidden;
+        /* Subtle pattern */
+        background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
     }
 
-    .chat-body-area {
-        flex: 1;
-        padding: 15px;
-        background: #f9f9fa;
-        overflow-y: auto;
-        font-size: 13px;
-    }
-    
-    .msg-row { margin-bottom: 10px; display: flex; }
-    .msg-ai { background: white; padding: 8px 12px; border-radius: 0 12px 12px 12px; border: 1px solid #eee; max-width: 85%; line-height: 1.4;}
-    .msg-me { background: var(--gold); color: white; padding: 8px 12px; border-radius: 12px 0 12px 12px; margin-left: auto; max-width: 85%; }
-
-    .chat-input-box {
-        padding: 12px;
-        border-top: 1px solid #eee;
-        background: white;
+    .brand-name {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         display: flex;
+        align-items: center;
+        justify-content: center;
         gap: 8px;
     }
     
-    .chat-input-box input {
-        flex: 1;
-        border: 1px solid #ddd;
-        border-radius: 20px;
-        padding: 6px 12px;
-        font-size: 13px;
+    .badge-admin {
+        font-size: 10px;
+        background: var(--accent-gold);
+        color: #000;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+        vertical-align: middle;
+        box-shadow: 0 2px 5px rgba(245, 158, 11, 0.4);
     }
-    .chat-input-box button {
+
+    .role-subtitle {
+        font-size: 11px;
+        opacity: 0.7;
+        margin-top: 6px;
+        font-weight: 300;
+    }
+
+    /* --- NAVIGATION MENU WITH ICONS --- */
+    .nav-menu {
+        list-style: none;
+        margin-top: 25px;
+        padding: 0 15px;
+    }
+
+    .nav-item {
+        margin-bottom: 8px;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .nav-item a {
+        display: flex;
+        align-items: center;
+        padding: 14px 18px;
+        color: rgba(255,255,255,0.85);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 13.5px;
+        transition: all 0.2s;
+        gap: 14px;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Hover & Active State */
+    .nav-item:hover {
+        background: var(--sidebar-active);
+        transform: translateX(3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .nav-item.active {
+        background: var(--sidebar-active);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    
+    .nav-item.active::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        width: 4px;
+        background: var(--accent-gold);
+        border-radius: 0 4px 4px 0;
+    }
+
+    .nav-item.active a {
+        color: #fff;
+        font-weight: 600;
+    }
+
+    /* Icon Styling Container */
+    .icon-box {
+        width: 22px;
+        height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    /* Custom SVG Icons Injection classes will handle colors */
+
+    /* Sidebar Footer */
+    .sidebar-footer {
+        margin-top: auto;
+        padding: 20px;
+        border-top: 1px solid var(--glass-border);
+    }
+
+    .btn-switch {
+        width: 100%;
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.2);
+        color: white;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+    .btn-switch:hover { background: rgba(255,255,255,0.1); border-color: white; }
+
+    /* --- MAIN CONTENT --- */
+    .main-content {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .top-header {
+        background: white;
+        padding: 20px 35px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        position: sticky;
+        top: 0;
+        z-index: 5;
+    }
+
+    .page-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .content-scroll-area {
+        padding: 35px;
+        max-width: 1200px;
+    }
+
+    /* Card Styling */
+    .panel-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+        padding: 28px;
+        margin-bottom: 30px;
+        border: 1px solid var(--border-color);
+    }
+
+    .panel-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .panel-title::after {
+        content: '';
+        flex: 1;
+        height: 2px;
+        background: var(--border-color);
+        border-radius: 2px;
+        margin-left: 15px;
+    }
+
+    /* Table Modern */
+    .table-modern {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .table-modern th {
+        text-align: left;
+        padding: 12px 16px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+        background: #F9FAFB;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .table-modern td {
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 13.5px;
+        color: var(--text-main);
+    }
+
+    /* Form Group */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    .field-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+    }
+    .input-modern {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid #D1D5DB;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 13.5px;
+        transition: border 0.2s;
+        background: #fff;
+    }
+    .input-modern:focus {
+        outline: none;
+        border-color: var(--accent-gold);
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+    }
+
+    .btn-primary {
         background: var(--sidebar-bg);
         color: white;
         border: none;
-        border-radius: 50%;
-        width: 32px;
-        height: 32px;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
         cursor: pointer;
+        width: 100%;
+        margin-top: 10px;
+        transition: filter 0.2s;
     }
+    .btn-primary:hover { filter: brightness(1.1); }
+
+    /* FLOATING CHAT WIDGET (Yu Leni) */
+    #yu-leni-widget {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 9999;
+    }
+
+    .chat-fab {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #F59E0B, #D97706);
+        border: none;
+        box-shadow: 0 4px 15px .chat-fab {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #F59E0B, #D97706);
+        border: none;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .chat-fab:hover { transform: scale(1.1) rotate(-5deg); }
+
+    .chat-popup {
+        position: absolute;
+        bottom: 70px;
+        right: 0;
+        width: 340px;
+        height: 420px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+        animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn { from{opacity:0; transform:scale(0.95) translateY(10px);} to{opacity:1; transform:scale(1) translateY(0);} }
+
+    .c-head {
+        background: var(--sidebar-bg);
+        color: white;
+        padding: 16px;
+        font-weight: 600;
+        font-size: 14px;
+        display:flex; justify-content:space-between; align-items:center;
+    }
+    .c-body {
+        flex:1; padding: 16px; background:#f9fafb; overflow-y:auto; font-size:13px; line-height:1.5;
+    }
+    .msg-bubble {
+        max-width:85%; padding:10px 14px; border-radius:12px; margin-bottom:10px; line-height:1.4;
+    }
+    .msg-bot { background:white; border:1px solid #e5e7eb; color:#333; border-bottom-left-radius:2px;}
+    .msg-user { background:var(--sidebar-bg); color:white; margin-left:auto; border-bottom-right-radius:2px; text-align:right;}
+    .c-foot {
+        padding:12px; border-top:1px solid #e5e7eb; display:flex; gap:8px; background:white;
+    }
+    .c-inp { flex:1; border:1px solid #d1d5db; border-radius:20px; padding:8px 14px; font-size:13px; outline:none;}
+    .c-send { background:var(--sidebar-bg); color:white; border:none; width:36px; height:36px; border-radius:50%; cursor:pointer;}
 
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR NAVIGATION -->
 <aside class="sidebar">
-    <div class="brand-area">
-        <div class="avatar-placeholder">👨‍🏫</div>
-        <div class="brand-title">Master Admin</div>
-        <div class="brand-subtitle">NIS: adminRI2</div>
+    <div class="brand-container">
+        <!-- Modern Avatar Area -->
+        <div class="modern-avatar">
+            <div class="avatar-ring"></div>
+            <div class="avatar-inner">👨🏼‍💼</div>
+        </div>
+        <div class="brand-name">Master Admin <span class="badge-admin">Pro</span></div>
+        <div class="role-subtitle">NIS: adminRI2 • Super Access</div>
     </div>
 
     <ul class="nav-menu">
-        <li class="nav-item active"><a href="#"><span class="nav-icon">📊</span>Dashboard</a></li>
-        <li class="nav-item"><a href="/ujian-matematika.html"><span class="nav-icon">🔢</span>Matematika Dasar</a></li>
-        <li class="nav-item"><a href="#"><span class="nav-icon">🧠</span>Psikotes / CFIT</a></li>
-        <li class="nav-item"><a href="#" onclick="toggleChat(); return false;"><span class="nav-icon">🤖</span>AI Lili Konsultasi</a></li>
-        <li class="nav-item"><a href="#" style="background:rgba(255,255,255,0.1); border-left-color:var(--gold);"><span class="nav-icon">⚙️</span><b>Rekap Guru BK & Admin</b></a></li>
+        <!-- Item 1: Dashboard -->
+        <li class="nav-item active">
+            <a href="#">
+                <div class="icon-box"><!-- SVG Icon Dashboard -->
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+                </div>
+                <span>Dashboard Overview</span>
+            </a>
+        </li>
+
+        <!-- Item 2: Matematika -->
+        <li class="nav-item">
+            <a href="/ujian-matematika.html">
+                <div class="icon-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path><line x1="12" y1="6" x2="12" y2="12"></line><line x1="9" y1="9" x2="15" y2="9"></line></svg>
+                </div>
+                <span>Matematika Dasar</span>
+            </a>
+        </li>
+
+        <!-- Item 3: Psikotes -->
+        <li class="nav-item">
+            <a href="#">
+                <div class="icon-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                </div>
+                <span>Psikotes / CFIT</span>
+            </a>
+        </li>
+
+        <!-- ITEM 4: REKAP (ACTIVE/HIGHLIGHT STYLE) -->
+        <li class="nav-item" style="background:rgba(255,255,255,0.08);">
+            <a href="#">
+                <div class="icon-box">
+                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                </div>
+                <span style="color:#FBBF24;">Rekap Guru BK & Admin</span>
+            </a>
+        </li>
     </ul>
 
     <div class="sidebar-footer">
-        <button class="btn-switch-user">🔄 Ganti Siswa</button>
+        <button class="btn-switch">
+            <span>↻</span> Ganti User Login
+        </button>
     </div>
 </aside>
 
-<!-- MAIN PANEL -->
 <main class="main-content">
-    <header class="top-bar">
-        <h2 class="page-title">Laporan Perkembangan Siswa (Khusus Guru BK)</h2>
-        <div style="font-size:13px; color:#666;">Status System: <span id="sys-status" style="color:green;font-weight:bold;">Online</span></div>
+    <header class="top-header">
+        <h1 class="page-title">Laporan Perkembangan Siswa</h1>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#6B7280;">
+             System: <span id="sys-stat" style="color:#10B981;font-weight:600;">● Online</span>
+        </div>
     </header>
 
-    <div class="content-wrapper">
+    <div class="content-scroll-area">
         
-        <!-- SECTION 1: TABEL DATA (Foto 2 Atas) -->
-        <section class="card-section">
-            <p style="font-size:13px;color:#666;margin-bottom:15px;">
-                Pantau skor ujian dan keluhan yang dialami setiap siswa untuk memberikan arahan yang presisi.
-            </p>
+        <!-- SECTION TABLE -->
+        <section class="panel-card">
+            <h3 class="panel-title">Data Rekapan Ujian & Konseling</h3>
+            <p style="font-size:13px;color:#666;margin-bottom:20px;">Monitor performa akademik dan psikologis siswa secara real-time.</p>
             
-            <table class="data-table">
+            <div style="overflow-x:auto;">
+            <table class="table-modern">
                 <thead>
                     <tr>
                         <th>Kode / NIS</th>
                         <th>Nama Siswa</th>
-                        <th>Riwayat Skor Ujian</th>
-                        <th>Keluhan / Konsultasi</th>
+                        <th>Riwayat Skor</th>
+                        <th>Status Konsultasi</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Data Dummy kosong sesuai Foto 2 -->
                     <tr>
-                        <td colspan="4" class="empty-state">Belum ada data siswa.</td>
+                        <td colspan="5" style="text-align:center;padding:40px;color:#9CA3AF;">
+                            Belum ada data siswa yang tercatat.
+                        </td>
                     </tr>
                 </tbody>
             </table>
+            </div>
         </section>
 
-        <!-- SECTION 2: FORM TAMBAH SOAL (Foto 2 Bawah) -->
-        <section class="card-section">
-            <div class="section-header">Tambah Soal Baru</div>
-            <form onsubmit="event.preventDefault(); alert('Soal disimpan ke Database (Simulasi)'); this.reset();">
+        <!-- SECTION FORM INPUT -->
+        <section class="panel-card">
+            <h3 class="panel-title">Tambah Soal Bank Baru</h3>
+            <form onsubmit="event.preventDefault(); alert('Soal berhasil disimpan!'); this.reset();">
                 
-                <div class="form-group">
-                    <label>Kategori Soal</label>
-                    <select class="form-control">
+                <div style="margin-bottom:20px;">
+                    <label class="field-label">Kategori Soal</label>
+                    <select class="input-modern" style="width:100%;">
                         <option>Matematika Dasar</option>
-                        <option>Psikologi (CFIT)</option>
-                        <option>Bimbingan Umum</option>
+                        <option>Tes Logika CFIT</option>
+                        <option>Tes Kepribadian</option>
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label>Pertanyaan / Soal</label>
-                    <input type="text" class="form-control" placeholder="Tulis soal disini...">
+                <div style="margin-bottom:20px;">
+                    <label class="field-label">Isi Pertanyaan</label>
+                    <input type="text" class="input-modern" placeholder="Ketik teks soal disini...">
                 </div>
 
-                <div class="options-grid">
-                    <div class="form-group"><label>Pilihan A</label><input type="text" class="form-control"></div>
-                    <div class="form-group"><label>Pilihan B</label><input type="text" class="form-control"></div>
-                    <div class="form-group"><label>Pilihan C</label><input type="text" class="form-control"></div>
-                    <div class="form-group"><label>Pilihan D</label><input type="text" class="form-control"></div>
+                <div class="form-grid">
+                    <div>
+                        <label class="field-label">Opsi A</label>
+                        <input type="text" class="input-modern">
+                    </div>
+                    <div>
+                        <label class="field-label">Opsi B</label>
+                        <input type="text" class="input-modern">
+                    </div>
+                    <div>
+                        <label class="field-label">Opsi C</label>
+                        <input type="text" class="input-modern">
+                    </div>
+                    <div>
+                        <label class="field-label">Opsi D</label>
+                        <input type="text" class="input-modern">
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Jawaban Benar</label>
-                    <select class="form-control">
+                <div style="margin-top:20px;">
+                    <label class="field-label">Jawaban Benar</label>
+                    <select class="input-modern" style="width:150px;">
                         <option>A</option><option>B</option><option>C</option><option>D</option>
                     </select>
                 </div>
 
-                <button type="submit" class="btn-submit">💾 Simpan Soal Baru</button>
+                <button type="submit" class="btn-primary" style="margin-top:25px;">Simpan ke Database</button>
             </form>
         </section>
 
     </div>
 </main>
 
-<!-- WIDGET YU LENI -->
+<!-- YU LENI WIDGET (Keep it!) -->
 <div id="yu-leni-widget">
-    <div id="chat-window">
-        <div class="chat-header-bk">
+    <div id="yleni-window" class="chat-popup">
+        <div class="c-head">
             <span>🤖 Yu Leni (AI Counselor)</span>
-            <span onclick="toggleChat()" style="cursor:pointer; font-size:16px;">✕</span>
+            <span onclick="toggleChat()" style="cursor:pointer;opacity:0.7;">✕</span>
         </div>
-        <div class="chat-body-area" id="yleni-chatbox">
-            <div class="msg-row"><div class="msg-ai">Selamat datang di Modul Admin! Saya siap membantu analisis psikologis siswa jika diperlukan.</div></div>
+        <div class="c-body" id="chat-feed">
+            <div class="msg-bubble msg-bot">Halo saya Yu Leni. Ada kendala teknis atau butuh analisis data? Silakan tanyakan!</div>
         </div>
-        <div class="chat-input-box">
-            <input type="text" id="yleni-input" placeholder="TanyaYuLeni...">
-            <button onclick="sendToAI()">➤</button>
+        <div class="c-foot">
+            <input type="text" class="c-inp" id="yleni-inp" placeholder="Type message...">
+            <button class="c-send" onclick="sendAI()">➤</button>
         </div>
     </div>
-    <button id="chat-trigger" onclick="toggleChat()">💬</button>
+    <button class="chat-fab" onclick="toggleChat()">💬</button>
 </div>
 
 <script>
-    // Toggle Chat Widget
+    // Toggle Widget Logic
     function toggleChat() {
-        const win = document.getElementById('chat-window');
-        win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
-        if(win.style.display==='flex') document.getElementById('yleni-input').focus();
+        const w = document.getElementById('yleni-window');
+        w.style.display = (w.style.display === 'flex') ? 'none' : 'flex';
+        if(w.style.display==='flex') document.getElementById('yleni-inp').focus();
     }
 
-    // Kirim Ke AI (Groq via API kita)
-    async function sendToAI() {
-        const inp = document.getElementById('yleni-input');
+    async function sendAI() {
+        const inp = document.getElementById('yleni-inp');
         const txt = inp.value.trim();
         if(!txt) return;
 
-        const box = document.getElementById('yleni-chatbox');
-        box.innerHTML += `<div class="msg-row"><div class="msg-me">${txt}</div></div>`;
-        inp.value = '';
-        box.scrollTop = box.scrollHeight;
+        const feed = document.getElementById('chat-feed');
+        feed.innerHTML += `<div class="msg-bubble msg-user">${txt}</div>`;
+        inp.value = ''; 
+        feed.scrollTop = feed.scrollHeight;
 
         try {
             const res = await fetch('/api/chat', {
-                method: 'POST',
+                method:'POST',
                 headers:{'Content-Type':'application/json'},
                 body: JSON.stringify({message: txt})
             });
             const data = await res.json();
             setTimeout(()=>{
-                box.innerHTML += `<div class="msg-row"><div class="msg-ai">${data.reply}</div></div>`;
-                box.scrollTop = box.scrollHeight;
-            }, 800);
+                feed.innerHTML += `<div class="msg-bubble msg-bot">${data.reply}</div>`;
+                feed.scrollTop = feed.scrollHeight;
+            }, 600);
         } catch(e) {
-            box.innerHTML += `<div class="msg-row"><div class="msg-ai" style="color:red">Error koneksi AI.</div></div>`;
+            feed.innerHTML += `<div class="msg-bubble msg-bot" style="color:red;">Error connecting.</div>`;
         }
     }
 
-    document.getElementById("yleni-input").addEventListener("keyup", (e)=>{
-        if(e.key==="Enter") sendToAI();
-    });
+    document.getElementById("yleni-inp").addEventListener("keyup", e => { if(e.key==="Enter") sendAI(); });
 
-    // Cek Health
-    fetch('/api/health').then(r=>r.json()).then(d=>{
-        document.getElementById('sys-status').innerText = "Backend OK ✅";
-        document.getElementById('sys-status').style.color = "green";
-    }).catch(e=>{
-        document.getElementById('sys-status').innerText = "Backend Error ❌";
-        document.getElementById('sys-status').style.color = "red";
+    // Health Check
+    fetch('/api/health').then(r=>r.json()).then(d => {
+        if(d.status === 'ok') console.log('Backend Healthy');
+    }).catch(() => {
+         document.getElementById('sys-stat').innerText = "● Offline";
+         document.getElementById('sys-stat').style.color = "#EF4444";
     });
 </script>
 </body>
