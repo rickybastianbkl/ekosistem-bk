@@ -293,7 +293,7 @@
     e.preventDefault();
     const code = document.getElementById('input-student-code').value.trim();
 
-    // Logika Akun Master Admin
+    // 1. Logika Akun Master Admin
     if (code === 'adminR12') {
       currentStudent = { code: 'adminR12', name: 'Master Admin' };
       localStorage.setItem('bk_student_session', JSON.stringify(currentStudent));
@@ -302,6 +302,43 @@
       switchTab('tab-admin', document.querySelectorAll('.nav-link')[4]);
       return;
     }
+
+    // 2. JALUR PINTAS: Data Dummy Siswa Sementara untuk Demo
+    const dataDummy = {
+      "DEMO-01": "Andi Pratama (Siswa Demo)",
+      "DEMO-02": "Siti Aminah (Siswa Demo)",
+      "DEMO-03": "Budi Santoso (Siswa Demo)"
+    };
+
+    if (dataDummy[code]) {
+      currentStudent = { code: code, name: dataDummy[code] };
+      localStorage.setItem('bk_student_session', JSON.stringify(currentStudent));
+      document.getElementById('portal-modal').style.display = 'none';
+      updateStudentUI();
+      return; // Berhenti di sini, tidak perlu cek ke database server
+    }
+
+    // 3. Logika Asli (Cek ke Database Server)
+    try {
+      const res = await fetch('/api/student/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentCode: code, studentName: "Siswa" })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        currentStudent = data.student;
+        localStorage.setItem('bk_student_session', JSON.stringify(currentStudent));
+        document.getElementById('portal-modal').style.display = 'none';
+        updateStudentUI();
+      } else {
+        alert("Kode Siswa tidak ditemukan di database!");
+      }
+    } catch (err) {
+      alert("Terjadi kesalahan saat menghubungi server. Pastikan API berjalan.");
+    }
+  }
 
     // Default nama diset ke "Siswa" karena input nama dihapus
     const res = await fetch('/api/student/login', {
