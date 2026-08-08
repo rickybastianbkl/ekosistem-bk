@@ -79,54 +79,62 @@ export default {
         return new Response(JSON.stringify(reportData), { headers });
       }
 
-      // --- 4. API// --- 4. API CHAT AI LILI (GROQ RECOMMENDED) ---
-if (path === '/api/chat' && request.method === 'POST') {
-    const { message } = await request.json();
-    const GROQ_KEY = env.GROQ_API_KEY;
-    
-    // Opsi 1: Menggunakan Groq (Gratis, Cepat, No Credit Card Required)
-    if (GROQ_KEY) {
-        try {
-            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${GROQ_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: "llama-3.1-8b-instant",
-                    messages: [
-                        { 
-                            role: "system", 
-                            content: "Kamu adalah Lili, AI Resepsionis dan Guru BK yang ramah, profesional, dan empatik di sebuah sekolah Indonesia. Jawablah pertanyaan siswa dalam Bahasa Indonesia dengan ringkas, suportif, dan menggunakan bahasa yang sopan." 
-                        },
-                        { role: "user", content: message }
-                    ],
-                    temperature: 0.7,
-                    max_tokens: 500
-                })
-            });
+          // --- 4. API CHAT AI LILI (GROQ - GRATIS TANPA CC) ---
+    if (path === '/api/chat' && request.method === 'POST') {
+      const { message } = await request.json();
+      const GROQ_KEY = env.GROQ_API_KEY;
 
-            const data = await response.json();
+      // Jika GROQ_API_KEY belum diset
+      if (!GROQ_KEY) {
+        return new Response(
+          JSON.stringify({ reply: "⚠️ GROQ_API_KEY belum dikonfigurasi di Cloudflare Dashboard." }), 
+          { status: 500, headers }
+        );
+      }
 
-            if (!response.ok) {
-                throw new Error(data.error?.message || 'Groq API Error');
-            }
+      try {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${GROQ_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: "llama-3.1-8b-instant",
+            messages: [
+              { 
+                role: "system", 
+                content: "Kamu adalah Lili, AI Resepsionis dan Guru BK yang ramah, profesional, dan empatik di sebuah sekolah Indonesia. Jawablah pertanyaan siswa dalam Bahasa Indonesia dengan ringkas (maks 3 kalimat), suportif, dan menggunakan bahasa yang sopan." 
+              },
+              { role: "user", content: message }
+            ],
+            temperature: 0.7,
+            max_tokens: 300
+          })
+        });
 
-            const reply = data.choices?.[0]?.message?.content || "Maaf, Lili sedang bingung.";
-            return new Response(JSON.stringify({ reply }), { headers });
+        const data = await response.json();
 
-        } catch (error) {
-            return new Response(
-                JSON.stringify({ reply: `Error: ${error.message}` }),
-                { status: 500, headers }
-            );
+        if (!response.ok) {
+          throw new Error(data.error?.message || 'Groq API Error');
         }
+
+        const reply = data.choices?.[0]?.message?.content || "Maaf, Lili sedang bingung.";
+        return new Response(JSON.stringify({ reply }), { headers });
+
+      } catch (error) {
+        console.error("Chat AI Error:", error);
+        return new Response(
+          JSON.stringify({ reply: `❌ Error AI: ${error.message}` }),
+          { status: 500, headers }
+        );
+      }
     }
 
-    // Fallback: Tidak ada key apapun
-    return new Response(
-        JSON.stringify({ reply: "⚠️ AI Lili sedang offline. Silakan hubungi admin BK." }),
-        { status: 503, headers }
-    );
-}
+    // Jika bukan URL API, layani file tampilan dari folder public/
+    return env.ASSETS.fetch(request);
+
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers });
+  }
+};
