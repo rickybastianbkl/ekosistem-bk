@@ -79,6 +79,32 @@ export async function onRequest(context) {
       return new Response(JSON.stringify(reportData), { headers });
     }
 
+    // --- 4. API CHAT AI LILI ---
+    if (path === '/api/chat' && request.method === 'POST') {
+      const { message } = await request.json();
+      const API_KEY = env.GEMINI_API_KEY;
+      const MODEL = "gemini-1.5-flash";
+
+      if (!API_KEY) {
+        return new Response(JSON.stringify({ reply: "API Key GEMINI_API_KEY belum dikonfigurasi di Cloudflare." }), { status: 500, headers });
+      }
+
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: {
+            parts: { text: "Kamu adalah Lili, AI Resepsionis dan Guru BK yang ramah, profesional, dan empatik. Jawablah pertanyaan siswa dengan ringkas dan suportif." }
+          },
+          contents: [{ role: "user", parts: [{ text: message }] }]
+        })
+      });
+
+      const data = await res.json();
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, Lili tidak dapat merespons saat ini.";
+      return new Response(JSON.stringify({ reply }), { headers });
+    }
+
     return new Response(JSON.stringify({ error: 'Endpoint tidak ditemukan' }), { status: 404, headers });
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), { status: 500, headers });
