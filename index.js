@@ -15,7 +15,7 @@ export default {
     }
 
     try {
-      // --- 1. API SISWA (LOGIN, SKOR, KELUHAN) ---
+      // --- 1. API SISWA ---
       if (path === '/api/student/login' && request.method === 'POST') {
         const { studentCode, studentName } = await request.json();
         await env.DB.prepare(
@@ -42,7 +42,7 @@ export default {
         return new Response(JSON.stringify({ success: true }), { headers });
       }
 
-      // --- 2. API SOAL (KELOLA SOAL ADMIN & UJIAN SISWA) ---
+      // --- 2. API SOAL ---
       if (path === '/api/questions' && request.method === 'GET') {
         const { results } = await env.DB.prepare(`SELECT * FROM questions`).all();
         return new Response(JSON.stringify(results), { headers });
@@ -62,7 +62,7 @@ export default {
         return new Response(JSON.stringify({ success: true }), { headers });
       }
 
-      // --- 3. API REKAP MASTER ADMIN ---
+      // --- 3. API REKAP ---
       if (path === '/api/admin/student-reports' && request.method === 'GET') {
         const { results: students } = await env.DB.prepare(`SELECT * FROM students`).all();
         const { results: scores } = await env.DB.prepare(`SELECT * FROM scores`).all();
@@ -79,16 +79,17 @@ export default {
         return new Response(JSON.stringify(reportData), { headers });
       }
 
-      // --- 4. API CHAT AI LILI (GROQ - GRATIS TANPA CC) ---
+      // --- 4. API CHAT AI LILI (GROQ - GRATIS & TANPA LIMIT BERAT) ---
       if (path === '/api/chat' && request.method === 'POST') {
         const { message } = await request.json();
+        
+        // Cek GROQ Secret dari Environment Runtime
         const GROQ_KEY = env.GROQ_API_KEY;
 
-        // Jika GROQ_API_KEY belum diset
         if (!GROQ_KEY) {
           return new Response(
-            JSON.stringify({ reply: "⚠️ GROQ_API_KEY belum dikonfigurasi di Cloudflare Dashboard." }), 
-            { status: 500, headers }
+            JSON.stringify({ reply: "⚠️ AI Lili sedang dikonfigurasi ulang. Silakan coba beberapa lagi." }), 
+            { status: 503, headers }
           );
         }
 
@@ -104,7 +105,7 @@ export default {
               messages: [
                 { 
                   role: "system", 
-                  content: "Kamu adalah Lili, AI Resepsionis dan Guru BK yang ramah, profesional, dan empatik di sebuah sekolah Indonesia. Jawablah pertanyaan siswa dalam Bahasa Indonesia dengan ringkas (maks 3 kalimat), suportif, dan menggunakan bahasa yang sopan." 
+                  content: "Kamu adalah Lili, AI Resepsionis dan Guru BK yang ramah, profesional, dan empatik di sebuah sekolah Indonesia. Jawablah pertanyaan siswa dalam Bahasa Indonesia dengan ringkas (maksimal 3 kalimat), suportif, dan menggunakan bahasa yang sopan." 
                 },
                 { role: "user", content: message }
               ],
@@ -116,22 +117,22 @@ export default {
           const data = await response.json();
 
           if (!response.ok) {
-            throw new Error(data.error?.message || 'Groq API Error');
+            throw new Error(data.error?.message || 'Server AI sedang sibuk');
           }
 
-          const reply = data.choices?.[0]?.message?.content || "Maaf, Lili sedang bingung.";
+          const reply = data.choices?.[0]?.message?.content || "Maaf, Lili bingung.";
           return new Response(JSON.stringify({ reply }), { headers });
 
         } catch (error) {
-          console.error("Chat AI Error:", error);
+          console.error("Chat Error:", error.message);
           return new Response(
-            JSON.stringify({ reply: `❌ Error AI: ${error.message}` }),
+            JSON.stringify({ reply: `❌ Gangguan teknis: ${error.message}` }),
             { status: 500, headers }
           );
         }
       }
 
-      // Jika bukan URL API, layani file tampilan dari folder public/
+      // Serve static files (HTML/CSS/JS) dari folder public/
       return env.ASSETS.fetch(request);
 
     } catch (err) {
