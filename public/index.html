@@ -365,6 +365,19 @@
   function updateStudentUI() {
     document.getElementById('disp-student-name').innerText = currentStudent.name;
     document.getElementById('disp-student-code').innerText = `NIS: ${currentStudent.code}`;
+
+    // --- PENGATURAN RULE PERAN AKUN (HAK AKSES) ---
+    const adminMenu = document.querySelectorAll('.nav-link')[4]; // Menargetkan menu ke-5 (Admin)
+
+    if (currentStudent.code === 'adminR12') {
+      adminMenu.style.display = 'flex'; // Tampilkan menu jika yang login adalah Master Admin
+    } else {
+      adminMenu.style.display = 'none'; // Sembunyikan menu jika yang login adalah Siswa/Demo
+      // Memastikan siswa selalu dialihkan ke Dashboard utama saat baru login
+      switchTab('tab-dashboard', document.querySelectorAll('.nav-link')[0]);
+    }
+    // ----------------------------------------------
+
     loadData();
   }
 
@@ -379,6 +392,13 @@
   }
 
   function switchTab(tabId, el) {
+    // --- KEAMANAN EKSTRA: Cegah siswa memaksa masuk tab admin ---
+    if (tabId === 'tab-admin' && currentStudent.code !== 'adminR12') {
+      alert('Akses Ditolak: Anda tidak memiliki izin untuk membuka halaman Master Admin.');
+      return; // Hentikan proses jika bukan admin
+    }
+    // ------------------------------------------------------------
+
     document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
     document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
