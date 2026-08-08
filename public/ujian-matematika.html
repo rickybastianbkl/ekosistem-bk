@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ujian Matematika Dasar - Ekosistem BK</title>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --primary-light: #4caf50;
+            --danger: #d32f2f;
+            --warning: #f57c00;
+            --bg: #f5f5f5;
+            --card-bg: white;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: var(--bg);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        
+        /* Timer */
+        .timer-container {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            min-width: 70px;
+            text-align: center;
+        }
+        
+        .timer-danger {
+            background: var(--danger);
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        /* Main Content */
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+            flex: 1;
+        }
+        
+        /* Pre-Start Screen */
+        .start-screen {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-top: 40px;
+        }
+        
+        .start-screen h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .info-box {
+            background: #e8f5e9;
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+            border-radius: 4px;
+        }
+        
+        .btn-start {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            font-size: 1.1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(46, 125, 50, 0.3);
+        }
+        
+        /* Question Card */
+        .question-container {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: none; /* Hidden initially */
+        }
+        
+        .question-number {
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        /* Options Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
+        @media (min-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .option-label:hover {
+            border-color: var(--primary-light);
+            background: #f1f8e9;
+        }
+        
+        .option-label.selected {
+            border-color: var(--primary);
+            background: #e8f5e9;
+        }
+        
+        .option-label input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+            accent-color: var(--primary);
+        }
+        
+        .option-letter {
+            width: 28px;
+            height: 28px;
+            background: var(--primary-light);
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 0.9rem;
+        }
+        
+        /* Progress Bar */
+        .progress-bar-container {
+            position: sticky;
+            top: 60px;
+            background: white;
+            padding: 10px 0;
+            z-index: 99;
+            border-bottom: 1px solid #eee;
+            margin: 0 -15px;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-light);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 10px;
+        }
+        
+        .btn-nav {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-prev {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-next {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-next:disabled {
+            background: #bdbdbd;
+            cursor: not-allowed;
+        }
+        
+        .btn-submit {
+            background: var(--danger);
+            color: white;
+            padding: 16px 40px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        
+        .btn-submit:hover:not(:disabled) {
+            background: #b71c1c;
+        }
+        
+        /* Result Screen */
+        .result-screen {
+            display: none;
+            text-align: center;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary-light) calc(var(--score) * 3.6deg), #e0e0e0 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        
+        .score-circle::before {
+            content: attr(data-score) "%";
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            background: white;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .grade-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin: 10px 0 20px;
+        }
+        
+        .grade-A { background: #4caf50; color: white; }
+        .grade-B { background: #2196f3; color: white; }
+        .grade-C { background: #ff9800; color: white; }
+        .grade-D { background: #f44336; color: white; }
+        
+        /* Yu Leni Section */
+        .yu-leni-section {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+            text-align: left;
+        }
+        
+        .yu-leni-avatar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .avatar-icon {
+            width: 40px;
+            height: 40px;
+            background: #ff9800;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+        
+        .chat-bubble {
+            background: white;
+            padding: 15px;
+            border-radius: 0 12px 12px 12px;
+            line-height: 1.5;
+            color: #555;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+        
+        /* Hidden */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-content">
+        <h1>🧮 Ujian Matematika Dasar</h1>
+        <div id="timerDisplay" class="timer-container">40:00</div>
+    </div>
+</div>
+
+<div class="container">
+    
+    <!-- SCREEN 1: START -->
+    <div id="screenStart" class="start-screen">
+        <h2>📝 Persiapan Ujian</h2>
+        <p>Silakan pastikan koneksi internet stabil dan siapkan alat tulis.</p>
+        
+        <div class="info-box">
+            <strong>📋 Informasi Ujian:</strong><br>
+            • Mata Pelajaran: Matematika Dasar<br>
+            • Jumlah Soal: <span id="totalQInfo">50</span> Soal<br>
+            • Durasi: <strong>40 Menit</strong><br>
+            • Jenis: Pilihan Ganda (A, B, C, D)<br><br>
+            <em style="color: #d32f2f;">⚠️ Peringatan: Setelah mulai, waktu langsung berjalan.</em>
+        </div>
+        
+        <button onclick="startExam()" class="btn-start">🚀 Mulai Sekarang</button>
+    </div>
+
+    <!-- SCREEN 2: QUESTIONS -->
+    <div id="screenExam" style="display:none;">
+        <!-- Progress Bar Sticky -->
+        <div class="progress-bar-container">
+            <div class="progress-info">
+                <span id="progressText">Soal 1 dari 50</span>
+                <span>Dijawab: <span id="answeredCount">0</span>/50</span>
+            </div>
+            <div class="progress-track">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- Dynamic Question Container -->
+        <div id="questionContainer" class="question-container" style="display:block;">
+            <!-- Diisi oleh JS -->
+        </div>
+
+        <div class="nav-buttons">
+            <button id="btnPrev" class="btn-nav btn-prev" onclick="prevQuestion()" disabled>⬅ Sebelumnya</button>
+            <button id="btnNext" class="btn-nav btn-next" onclick="nextQuestion()">Selanjutnya ➡</button>
+        </div>
+
+        <button id="btnFinish" class="hidden btn-submit" onclick="confirmSubmit()">✅ Kirim Jawaban & Lihat Hasil</button>
+    </div>
+
+    <!-- SCREEN 3: RESULTS -->
+    <div id="screenResult" class="result-screen">
+        <h2 style="color:var(--primary)">🎉 Ujian Selesai!</h2>
+        
+        <div id="scoreCircle" class="score-circle" data-score="0">0%</div>
+        
+        <p style="font-size:1.2rem;color:#555;">
+            Kamu menjawab <strong id="correctNum">0</strong> dari <strong id="totalNum">50</strong> soal dengan benar!
+        </p>
+        
+        <div id="gradeBadge" class="grade badge-D">D</div>
+        
+        <!-- Yu Leni Analysis Area -->
+        <div class="yu-leni-section" id="yuLeniArea">
+            <div class="yu-leni-avatar">
+                <div class="avatar-icon">💬</div>
+                <strong>Yu Leni sedang menganalisis...</strong>
+            </div>
+            <div class="chat-bubble loading-dots" id="yuLeniChat">
+                Sedang membaca jawaban kamu...
+            </div>
+        </div>
+
+        <button class="btn-nav btn-next" style="margin-top:20px;" onclick="location.reload()">🔄 Ulangi Ujian</button>
+        <button class="btn-nav btn-prev" style="margin-top:20px;" onclick="window.location.href='/'">🏠 Kembali ke Dashboard</button>
+    </div>
+
+</div>
+
+<script>
+    // Konfigurasi Global
+    const CONFIG = {
+        category: 'math',
+        totalTimeMin: 40,
+        totalQuestions: 50,
+        apiBase: '' // Kosongkan karena relative URL (same domain)
+    };
+
+    // State Management
+    let state = {
+        currentQuestion: 0,
+        answers: {}, // { questionId: 'A' }
+        questions: [],
+        sessionId: null,
+        timerInterval: null,
+        remainingSeconds: CONFIG.totalTimeMin * 60,
+        isSubmitted: false
+    };
+
+    // DOM Elements
+    const screens = {
+        start: document.getElementById('screenStart'),
+        exam: document.getElementById('screenExam'),
+        result: document.getElementById('screenResult')
+    };
+
+    // ====== INISIASI & LOGIN ======
+    window.onload = function() {
+        // Cek apakah siswa sudah login (gunakan kode sementara dari localStorage atau prompt)
+        const savedCode = localStorage.getItem('bk_studentCode') || prompt('Masukkan Kode Siswa:');
+        if(savedCode) {
+            localStorage.setItem('bk_studentCode', savedCode);
+            checkActiveSession(savedCode);
+        }
+    };
+
+    // Cek apakah ada sesi yang masih berjalan
+    async function checkActiveSession(studentCode) {
+        try {
+            const res = await fetch(`${CONFIG.apiBase}/api/exam/status?code=${encodeURIComponent(studentCode)}&category=${CONFIG.category}`);
+            const data = await res.json();
+            
+            if (data.hasActiveExam && !data.isExpired) {
+                // Tanya ingin lanjutkan?
+                if(confirm(`Ditemukan ujian yang belum selesai!\nSisa waktu: ${Math.floor(data.remainingSeconds/60)} menit.\n\nLanjutkan?`)) {
+                    // TODO: Implementasi resume (fetch ulang soal dari session storage atau re-fetch)
+                    alert('Fitur lanjutan sesi akan tersedia di update selanjutnya. Memulai ujian baru...');
+                    startExamFlow(studentCode);
+                } else {
+                    startNewSession(studentCode);
+                }
+            }
+        } catch(e) {
+            console.log('No active session or offline mode');
+        }
+    }
+
+    // ====== ALUR UTAMAN UJIAN ======
+    async function startExam() {
+        const studentCode = localStorage.getItem('bk_studentCode');
+        if(!studentCode) {
+            alert('Kode siswa tidak ditemukan!');
+            return;
+        }
+        await startNewSession(studentCode);
+    }
+
+    async function startNewSession(studentCode) {
+        try {
+            showLoading(true);
+            
+            const res = await fetch(`${CONFIG.apiBase}/api/exam/start`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    studentCode: studentCode,
+                    category: CONFIG.category
+                })
+            });
+
+            const data = await res.json();
+            
+            if (!res.ok || data.error) {
+                alert('Error: ' + (data.error || 'Gagal memulai ujian'));
+                showLoading(false);
+                return;
+            }
+
+            // Initialize state
+            state.sessionId = data.sessionId;
+            state.questions = data.questions;
+            state.remainingSeconds = data.timeLimitMinutes * 60;
+
+            // Switch Screen
+            screens.start.style.display = 'none';
+            screens.exam.style.display = 'block';
+            
+            // Render First Question
+            renderQuestion(0);
+            
+            // Start Timer
+            startTimer();
+
+        } catch(err) {
+            console.error(err);
+            alert('Gagal menghubungi server. Cek koneksi internet.');
+            showLoading(false);
+        }
+    }
+
+    // ====== RENDER SOAL ======
+    function renderQuestion(index) {
+        if(index < 0 || index >= state.questions.length) return;
+        
+        state.currentQuestion = index;
+        const q = state.questions[index];
+        const container = document.getElementById('questionContainer');
+        
+        const letters = ['A','B','C','D'];
+        const options = [
+            { letter: 'A', text: q.optionA },
+            { letter: 'B', text: q.optionB },
+            { letter: 'C', text: q.optionC },
+            { letter: 'D', text: q.optionD }
+        ];
+
+        container.innerHTML = `
+            <div class="question-number">Soal ${index + 1} dari ${state.questions.length}</div>
+            <div class="question-text">${q.questionText}</div>
+            <div class="options-grid">
+                ${options.map(opt => `
+                    <label class="option-label ${state.answers[q.id] === opt.letter ? 'selected' : ''}">
+                        <input type="radio" name="q${q.id}" value="${opt.letter}" 
+                            ${state.answers[q.id] === opt.letter ? 'checked' : ''}
+                            onchange="selectAnswer(${q.id}, '${opt.letter}')">
+                        <span class="option-letter">${opt.letter}</span>
+                        <span>${opt.text}</span>
+                    </label>
+                `).join('')}
+            </div>
+        `;
+
+        // Update Navigation State
+        document.getElementById('btnPrev').disabled = (index === 0);
+        
+        const isLast = (index === state.questions.length - 1);
+        document.getElementById('btnNext').style.display = isLast ? 'none' : 'inline-block';
+        document.getElementById('btnFinish').style.display = isLast ? 'inline-block' : 'none';
+
+        updateProgress();
+    }
+
+    function selectAnswer(questionId, option) {
+        state.answers[questionId] = option;
+        // Update visual selection saat ini
+        renderQuestion(state.currentQuestion);
+    }
+
+    function nextQuestion() {
+        if(state.currentQuestion < state.questions.length - 1) {
+            renderQuestion(state.currentQuestion + 1);
+        }
+    }
+
+    function prevQuestion() {
+        if(state.currentQuestion > 0) {
+            renderQuestion(state.currentQuestion - 1);
+        }
+    }
+
+    function updateProgress() {
+        const answered = Object.keys(state.answers).length;
+        const percent = (answered / state.questions.length) * 100;
+        
+        document.getElementById('progressText').textContent = `Soal ${state.currentQuestion + 1} dari ${state.questions.length}`;
+        document.getElementById('answeredCount').textContent = answered;
+        document.getElementById('progressFill').style.width = `${percent}%`;
+    }
+
+    // ====== TIMER ======
+    function startTimer() {
+        const display = document.getElementById('timerDisplay');
+        
+        state.timerInterval = setInterval(() => {
+            state.remainingSeconds--;
+            
+            if(state.remainingSeconds <= 0) {
+                clearInterval(state.timerInterval);
+                handleTimeUp();
+                return;
+            }
+
+            const mins = Math.floor(state.remainingSeconds / 60);
+            const secs = state.remainingSeconds % 60;
+            display.textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+            
+            // Visual warning di bawah 5 menit
+            if(state.remainingSeconds <= 300) {
+                display.classList.add('timer-danger');
+            }
+        }, 1000);
+    }
+
+    function handleTimeUp() {
+        alert('⏰ WAKTU HABIS! Ujian otomatis dikumpulkan.');
+        submitExam(true); // autoSubmit flag true
+    }
+
+    // ====== SUBMISSION ======
+    function confirmSubmit() {
+        const unanswered = state.questions.length - Object.keys(state.answers).length;
+        let msg = `Anda yakin mau mengirim?\n\n`;
+        msg += `Total Soal: ${state.questions.length}\n`;
+        msg += `Terjawab: ${Object.keys(state.answers).length}\n`;
+        
+        if(unanswered > 0) {
+            msg += `\n⚠️ Masih ada ${unanswered} soal belum dijawab (akan dihitung salah).\n\n`;
+        }
+        msg += `Sisa waktu: ${document.getElementById('timerDisplay').textContent}`;
+        
+        if(confirm(msg)) {
+            submitExam(false);
+        }
+    }
+
+    async function submitExam(autoSubmit = false) {
+        if(state.isSubmitted) return;
+        state.isSubmitted = true;
+        
+        clearInterval(state.timerInterval);
+
+        // Prepare answers array
+        const answersArray = state.questions.map(q => ({
+            questionId: q.id,
+            option: state.answers[q.id] || null // null = not answered
+        }));
+
+        showLoading(true, screens.exam);
+
+        try {
+            const res = await fetch(`${CONFIG.apiBase}/api/exam/submit`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    sessionId: state.sessionId,
+                    answers: answersArray
+                })
+            });
+
+            const result = await res.json();
+            
+            showScreen(screens.result);
+            displayResults(result);
+            
+            // Panggil Yu Leni untuk analisis
+            await callYuLeniAnalysis(result, answersArray);
+
+        } catch(err) {
+            console.error(err);
+            // Fallback tampilkan lokal kalau server error (jarang tapi antisipasi)
+            alert('Gagal menyimpan ke server. Coba lagi.');
+            state.isSubmitted = false; // allow retry
+            showLoading(false, null);
+        }
+    }
+
+    function displayResults(result) {
+        document.getElementById('scoreCircle').setAttribute('data-score', result.score);
+        document.getElementById('scoreCircle').style.setProperty('--score', result.score);
+        
+        document.getElementById('correctNum').textContent = result.correct;
+        document.getElementById('totalNum').textContent = result.total;
+        
+        const badge = document.getElementById('gradeBadge');
+        badge.textContent = result.grade;
+        badge.className = `grade-badge grade-${result.grade}`;
+        
+        // Hide exam, show result
+        screens.exam.style.display = 'none';
+        screens.result.style.display = 'block';
+    }
+
+    // ====== YU LENI INTEGRATION (POST-EXAM) ======
+    async function callYuLeniAnalysis(examResult, userAnswers) {
+        const chatEl = document.getElementById('yuLeniChat');
+        chatEl.className = 'chat-bubble loading-dots';
+        chatEl.textContent = 'Yu Leni sedang membaca hasilmu...';
+
+        // Siapkan context untuk Yu Leni
+        const wrongAnswers = userAnswers.filter(a => !examResult.correctIds?.includes(a.questionId)); // simplified
+        
+        try {
+            const res = await fetch(`${CONFIG.apiBase}/api/chat`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    message: `
+                    Halo Kak Yu Leni, aku baru saja selesai ujian matematika dasar.
+                    Skor aku: ${examResult.score}/100 (${examResult.grade})
+                    Benar: ${examResult.correct}, Salah: ${examResult.total - examResult.correct}
+                    
+                    Tolong dong kakak kasih analisis singkat (gaya ghibah ya):
+                    1. Gimana performaku menurut kakak?
+                    2. Materi apa yang paling susah (kalau ada clue)?
+                    3. Motivasi supaya aku ga down gitu...
+                    
+                    Jawaban dengan nada hangat kayak kakak kelas ya! (Max 3 kalimat aja biar efisien)`
+                })
+            });
+
+            const data = await res.json();
+            
+            setTimeout(() => {
+                chatEl.className = 'chat-bubble';
+                chatEl.innerHTML = data.reply.replace(/\n/g, '<br>'); // support multiline
+            }, 1000); // Simulasi typing effect
+            
+        } catch(err) {
+            chatEl.textContent = 'Waduh, Yu Leni lagi sibuk ngegosipin sama guru lain 😅 Tapi nilaimu bagus ko! Keep it up! 🌟';
+        }
+    }
+
+    // ====== UTILITIES ======
+    function showScreen(screenToShow) {
+        [screens.start, screens.exam, screens.result].forEach(s => s.style.display = 'none');
+        screenToShow.style.display = screenToShow === screens.result ? 'block' : 'flex'; // special layout untuk result
+    }
+
+    function showLoading(show, targetElement) {
+        if(show) {
+            // Implementation simple (could add spinner overlay here)
+        } else {
+            // Remove loading state
+        }
+    }
+
+    // Safety Net: Warn before leaving page during exam
+    window.addEventListener('beforeunload', function(e) {
+        if(screens.exam.style.display !== 'none' && !state.isSubmitted) {
+            e.preventDefault();
+            e.returnValue = 'Ujian masih berjalan! Yakin mau keluar?';
+        }
+    });
+</script>
+
+</body>
+</html>
