@@ -111,10 +111,12 @@
     <div style="font-size: 2.5rem; margin-bottom: 8px;">🎓</div>
     <div class="portal-title">Portal Ujian & Konsultasi BK</div>
     <div class="portal-sub">Masukkan Kode Siswa / NIS untuk mencatat progres latihan Anda.</div>
-    <form onsubmit="handlePortalLogin(event)">
-      <input type="text" id="input-student-code" class="form-ctrl" placeholder="Kode Siswa / NIS (cth: SISWA-101)" required>
-      <button type="submit" class="btn-submit" style="margin-top: 8px;">Masuk Ke Dashboard</button>
-    </form>
+    
+    <!-- Tag form dihapus dan diganti div biasa -->
+    <div>
+      <input type="text" id="input-student-code" class="form-ctrl" placeholder="Kode Siswa / NIS (cth: SISWA-101)" onkeypress="if(event.key === 'Enter') handlePortalLogin(event)" required>
+      <button type="button" class="btn-submit" style="margin-top: 8px;" onclick="handlePortalLogin(event)">Masuk Ke Dashboard</button>
+    </div>
   </div>
 </div>
 
@@ -293,7 +295,7 @@
     e.preventDefault();
     const code = document.getElementById('input-student-code').value.trim();
 
-    // 1. Logika Akun Master Admin
+    // Logika Akun Master Admin
     if (code === 'adminR12') {
       currentStudent = { code: 'adminR12', name: 'Master Admin' };
       localStorage.setItem('bk_student_session', JSON.stringify(currentStudent));
@@ -302,43 +304,6 @@
       switchTab('tab-admin', document.querySelectorAll('.nav-link')[4]);
       return;
     }
-
-    // 2. JALUR PINTAS: Data Dummy Siswa Sementara untuk Demo
-    const dataDummy = {
-      "DEMO-01": "Andi Pratama (Siswa Demo)",
-      "DEMO-02": "Siti Aminah (Siswa Demo)",
-      "DEMO-03": "Budi Santoso (Siswa Demo)"
-    };
-
-    if (dataDummy[code]) {
-      currentStudent = { code: code, name: dataDummy[code] };
-      localStorage.setItem('bk_student_session', JSON.stringify(currentStudent));
-      document.getElementById('portal-modal').style.display = 'none';
-      updateStudentUI();
-      return; // Berhenti di sini, tidak perlu cek ke database server
-    }
-
-    // 3. Logika Asli (Cek ke Database Server)
-    try {
-      const res = await fetch('/api/student/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ studentCode: code, studentName: "Siswa" })
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        currentStudent = data.student;
-        localStorage.setItem('bk_student_session', JSON.stringify(currentStudent));
-        document.getElementById('portal-modal').style.display = 'none';
-        updateStudentUI();
-      } else {
-        alert("Kode Siswa tidak ditemukan di database!");
-      }
-    } catch (err) {
-      alert("Terjadi kesalahan saat menghubungi server. Pastikan API berjalan.");
-    }
-  }
 
     // Default nama diset ke "Siswa" karena input nama dihapus
     const res = await fetch('/api/student/login', {
