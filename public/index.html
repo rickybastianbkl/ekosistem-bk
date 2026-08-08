@@ -291,16 +291,19 @@
     }
   }
 
+  // --- MULAI SALIN DARI SINI ---
   async function handlePortalLogin(e) {
-    if (e) e.preventDefault(); // Mencegah reload bawaan form (untuk keamanan)
-    const code = document.getElementById('input-student-code').value.trim();
+    if (e) e.preventDefault();
+    const codeEl = document.getElementById('input-student-code');
+    if (!codeEl) return;
+    const code = codeEl.value.trim();
 
     if (!code) {
       alert("Silakan masukkan Kode Siswa / NIS terlebih dahulu!");
       return;
     }
 
-    // 1. Logika Akun Master Admin
+    // 1. Master Admin
     if (code === 'adminR12') {
       currentStudent = { code: 'adminR12', name: 'Master Admin' };
       localStorage.setItem('bk_student_session', JSON.stringify(currentStudent));
@@ -310,7 +313,7 @@
       return;
     }
 
-    // 2. JALUR PINTAS: Data Dummy Siswa Sementara untuk Demo
+    // 2. Data Dummy Siswa
     const dataDummy = {
       "DEMO-01": "Andi Pratama (Siswa Demo)",
       "DEMO-02": "Siti Aminah (Siswa Demo)",
@@ -322,10 +325,11 @@
       localStorage.setItem('bk_student_session', JSON.stringify(currentStudent));
       document.getElementById('portal-modal').style.display = 'none';
       updateStudentUI();
+      switchTab('tab-dashboard', document.querySelectorAll('.nav-link')[0]);
       return; 
     }
 
-    // 3. Logika Asli (Cek ke Database Server)
+    // 3. Logika API (Cek Database)
     try {
       const res = await fetch('/api/student/login', {
         method: 'POST',
@@ -339,47 +343,56 @@
         localStorage.setItem('bk_student_session', JSON.stringify(currentStudent));
         document.getElementById('portal-modal').style.display = 'none';
         updateStudentUI();
+        switchTab('tab-dashboard', document.querySelectorAll('.nav-link')[0]);
       } else {
         alert("Kode Siswa tidak ditemukan di database!");
       }
     } catch (err) {
-      alert("Terjadi kesalahan saat menghubungi server. Pastikan API berjalan.");
-    }
-
-    // Default nama diset ke "Siswa" karena input nama dihapus
-    const res = await fetch('/api/student/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ studentCode: code, studentName: "Siswa" })
-    });
-    const data = await res.json();
-
-    if (data.success) {
-      currentStudent = data.student;
-      localStorage.setItem('bk_student_session', JSON.stringify(currentStudent));
-      document.getElementById('portal-modal').style.display = 'none';
-      updateStudentUI();
+      alert("Terjadi kesalahan server atau API belum siap.");
     }
   }
 
   function updateStudentUI() {
+    if (!currentStudent) return; 
+    
     document.getElementById('disp-student-name').innerText = currentStudent.name;
     document.getElementById('disp-student-code').innerText = `NIS: ${currentStudent.code}`;
 
-    // --- PENGATURAN RULE PERAN AKUN (HAK AKSES) ---
-    const adminMenu = document.querySelectorAll('.nav-link')[4]; // Menargetkan menu ke-5 (Admin)
-
-    if (currentStudent.code === 'adminR12') {
-      adminMenu.style.display = 'flex'; // Tampilkan menu jika yang login adalah Master Admin
-    } else {
-      adminMenu.style.display = 'none'; // Sembunyikan menu jika yang login adalah Siswa/Demo
-      // Memastikan siswa selalu dialihkan ke Dashboard utama saat baru login
-      switchTab('tab-dashboard', document.querySelectorAll('.nav-link')[0]);
+    // Pengaturan Hak Akses (Aman)
+    const navLinks = document.querySelectorAll('.nav-link');
+    const adminMenu = navLinks.length > 4 ? navLinks[4] : null; 
+    
+    if (adminMenu) {
+      if (currentStudent.code === 'adminR12') {
+        adminMenu.style.display = 'flex';
+      } else {
+        adminMenu.style.display = 'none';
+      }
     }
-    // ----------------------------------------------
 
-    loadData();
+    if (typeof loadData === 'function') loadData();
   }
+
+  function switchTab(tabId, el) {
+    if (!currentStudent) return;
+
+    if (tabId === 'tab-admin' && currentStudent.code !== 'adminR12') {
+      alert('Akses Ditolak: Anda tidak memiliki izin untuk membuka halaman Master Admin.');
+      return;
+    }
+
+    document.querySelectorAll('.tab-section').forEach(sec => sec.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    
+    const targetTab = document.getElementById(tabId);
+    if (targetTab) targetTab.classList.add('active');
+    if (el) el.classList.add('active');
+
+    if (tabId === 'tab-admin' && typeof loadTeacherReports === 'function') {
+      loadTeacherReports();
+    }
+  }
+  // --- SAMPAI SINI ---
 
   function logout() {
     localStorage.removeItem('bk_student_session');
