@@ -1,142 +1,54 @@
+﻿// FILE: index.js (Cloudflare Worker Entry Point)
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    const path = url.pathname;
 
-    const headers = {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    };
-
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { headers });
+    // 1. SERVE STATIC ASSETS
+    if (url.pathname === '/' || url.pathname.startsWith('/assets/') || url.pathname.endsWith('.html') || url.pathname.endsWith('.css') || url.pathname.endsWith('.js')) {
+      let path = url.pathname === '/' ? '/index.html' : url.pathname;
+      const asset = await env.ASSETS.fetch(new Request(path));
+      return new Response(asset.body, {
+        status: asset.status,
+        headers: { 'Content-Type': getContentType(path) }
+      });
     }
 
-    try {
-      // --- 1. API SISWA ---
-      if (path === '/api/student/login' && request.method === 'POST') {
-        const { studentCode, studentName } = await request.json();
-        await env.DB.prepare(
-          `INSERT INTO students (code, name) VALUES (?, ?) ON CONFLICT(code) DO UPDATE SET name = ?`
-        ).bind(studentCode, studentName, studentName).run();
-        return new Response(JSON.stringify({ success: true, student: { code: studentCode, name: studentName } }), { headers });
-      }
+    // API HEALTH
+    if (url.pathname === '/api/health') {
+      return Response.json({ status: 'ok', time: new Date().toISOString() });
+    }
 
-      if (path === '/api/student/score' && request.method === 'POST') {
-        const { studentCode, category, score, total, correct } = await request.json();
-        const date = new Date().toLocaleString('id-ID');
-        await env.DB.prepare(
-          `INSERT INTO scores (student_code, category, score, correct, total, date) VALUES (?, ?, ?, ?, ?, ?)`
-        ).bind(studentCode, category, score, correct, total, date).run();
-        return new Response(JSON.stringify({ success: true }), { headers });
-      }
-
-      if (path === '/api/student/complaint' && request.method === 'POST') {
-        const { studentCode, message } = await request.json();
-        const date = new Date().toLocaleString('id-ID');
-        await env.DB.prepare(
-          `INSERT INTO complaints (student_code, message, date) VALUES (?, ?, ?)`
-        ).bind(studentCode, message, date).run();
-        return new Response(JSON.stringify({ success: true }), { headers });
-      }
-
-      // --- 2. API SOAL ---
-      if (path === '/api/questions' && request.method === 'GET') {
-        const { results } = await env.DB.prepare(`SELECT * FROM questions`).all();
-        return new Response(JSON.stringify(results), { headers });
-      }
-
-      if (path === '/api/admin/questions' && request.method === 'POST') {
-        const { category, questionText, optionA, optionB, optionC, optionD, correctOption } = await request.json();
-        await env.DB.prepare(
-          `INSERT INTO questions (category, question_text, option_a, option_b, option_c, option_d, correct_option) VALUES (?, ?, ?, ?, ?, ?, ?)`
-        ).bind(category, questionText, optionA, optionB, optionC, optionD, correctOption).run();
-        return new Response(JSON.stringify({ success: true }), { headers });
-      }
-
-      if (path === '/api/admin/questions' && request.method === 'DELETE') {
-        const { id } = await request.json();
-        await env.DB.prepare(`DELETE FROM questions WHERE id = ?`).bind(id).run();
-        return new Response(JSON.stringify({ success: true }), { headers });
-      }
-
-      // --- 3. API REKAP ---
-      if (path === '/api/admin/student-reports' && request.method === 'GET') {
-        const { results: students } = await env.DB.prepare(`SELECT * FROM students`).all();
-        const { results: scores } = await env.DB.prepare(`SELECT * FROM scores`).all();
-        const { results: complaints } = await env.DB.prepare(`SELECT * FROM complaints`).all();
-
-        const reportData = {};
-        students.forEach(s => {
-          reportData[s.code] = {
-            name: s.name,
-            scores: scores.filter(sc => sc.student_code === s.code),
-            complaints: complaints.filter(c => c.student_code === s.code)
-          };
-        });
-        return new Response(JSON.stringify(reportData), { headers });
-      }
-
-      // --- 4. API CHAT AI LILI (GROQ - GRATIS & TANPA LIMIT BERAT) ---
-      if (path === '/api/chat' && request.method === 'POST') {
+    // AI YU LENI CHAT
+    if (url.pathname === '/api/chat' && request.method === 'POST') {
+      try {
         const { message } = await request.json();
-        
-        // Cek GROQ Secret dari Environment Runtime
-        const GROQ_KEY = env.GROQ_API_KEY;
+        const systemPrompt = `Kamu adalah Yu Leni, Konselor Digital Cerdas Sekolah Indonesia. Gaya bicara: Ramah, sabar, menggunakan bahasa Indonesia santun. Tugas: Memberikan motivasi belajar dan managing stress.`;
 
-        if (!GROQ_KEY) {
-          return new Response(
-            JSON.stringify({ reply: "⚠️ AI Lili sedang dikonfigurasi ulang. Silakan coba beberapa lagi." }), 
-            { status: 503, headers }
-          );
-        }
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${env.GROQ_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: "llama-3.1-8b-instant",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: message }
+            ],
+            temperature: 0.7,
+            max_tokens: 1024
+          })
+        });
 
-        try {
-          const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${GROQ_KEY}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              model: "llama-3.1-8b-instant",
-              messages: [
-                { 
-                  role: "system", 
-                  content: "Kamu adalah Lili, AI Resepsionis dan Guru BK yang ramah, profesional, dan empatik di sebuah sekolah Indonesia. Jawablah pertanyaan siswa dalam Bahasa Indonesia dengan ringkas (maksimal 3 kalimat), suportif, dan menggunakan bahasa yang sopan." 
-                },
-                { role: "user", content: message }
-              ],
-              temperature: 0.7,
-              max_tokens: 300
-            })
-          });
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            throw new Error(data.error?.message || 'Server AI sedang sibuk');
-          }
-
-          const reply = data.choices?.[0]?.message?.content || "Maaf, Lili bingung.";
-          return new Response(JSON.stringify({ reply }), { headers });
-
-        } catch (error) {
-          console.error("Chat Error:", error.message);
-          return new Response(
-            JSON.stringify({ reply: `❌ Gangguan teknis: ${error.message}` }),
-            { status: 500, headers }
-          );
-        }
+        const data = await res.json();
+        return Response.json({ reply: data.choices[0].message.content });
+      } catch (err) {
+        return Response.json({ error: err.message }, { status: 500 });
       }
-
-      // Serve static files (HTML/CSS/JS) dari folder public/
-      return env.ASSETS.fetch(request);
-
-    } catch (err) {
-      return new Response(JSON.stringify({ error: err.message }), { status: 500, headers });
     }
+
+    return new Response('Not Found', { status: 404 });
   }
 };
+function getContentType(p) { if(p.endsWith('.html')) return 'text/html'; if(p.endsWith('.css')) return 'text/css'; if(p.endsWith('.js')) return 'application/javascript'; return 'text/plain'; }
